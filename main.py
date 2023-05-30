@@ -1,27 +1,27 @@
 import os
-import re
-import docx2pdf
 import fitz
 
-def search_word_document(directory,search_term):
-    #convert the word document to PDF
-    for file_name in os.listdir(directory):
-        if not file_name.endswith('.docx'):
-            continue
-        pdf_name = file_name[:-5] + '.pdf'
-        docx2pdf.convert(os.path.join(directory,file_name), os.path.join(directory, pdf_name))
-
-    #search through the pdf and extract the page number of each match
+directory = r'C:\Users\RogerYampang\Downloads'
+pdf_files = [file for file in os.listdir(directory) if file.endswith('.pdf')]
+pdf_files.sort()
+print('List of all pdfs:')
+for file in pdf_files:
+    print(file)
+def search_pdf_document(directory, search_item):
     for file_name in os.listdir(directory):
         if not file_name.endswith('.pdf'):
             continue
-        with fitz.open(os.path.join(directory,file_name)) as doc:
-            for page in doc:
-                text = page.getText()
-                for match in re.finditer(search_term,text):
-                    print(f'Found match in {file_name}, paege {page.number + 1}')
+        file_path = os.path.join(directory, file_name)
+        with fitz.open(file_path) as doc:
+            found_pages = []
+            for page_num, page in enumerate(doc, 1):
+                text = page.get_text()
+                if search_item in text:
+                    found_pages.append(page_num)
+            if found_pages:
+                print(f'Found match in {file_name}, pages: {", ".join(map(str, found_pages))}')
 
-#write the directory path of the word document you want to test
-directory = r"C:\Users\roger\Downloads\urlaub_project_DE.docx"
-search_term = 'apple'
-search_word_document(directory, search_term)
+search_item = "Frankfurt"
+print('\n')
+print('Results:')
+search_pdf_document(directory,search_item)
